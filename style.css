@@ -23,7 +23,7 @@ body {
     linear-gradient(rgba(0, 0, 0, 0.75) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.75) 1px, transparent 1px),
     #111111;
-  background-size: 6px 6px, 6px 6px, auto;
+  background-size: 5px 5px, 5px 5px, auto;
 }
 
 .hero::after {

@@ -91,8 +91,8 @@
   var hero = document.querySelector('.hero');
   if (!canvas || !hero) return;
   var ctx = canvas.getContext('2d');
-  var cellSize = 6;
-  var green = '#4c814c';
+  var cellSize = 5;
+  var green = '#5c945c';
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   var cols, rows, state, nextState;
 
@@ -115,11 +115,11 @@
   function seed(px, py) {
     var cx = Math.floor(px / cellSize);
     var cy = Math.floor(py / cellSize);
-    for (var dy = -1; dy <= 1; dy++) {
-      for (var dx = -1; dx <= 1; dx++) {
+    for (var dy = -2; dy <= 2; dy++) {
+      for (var dx = -2; dx <= 2; dx++) {
         var x = cx + dx, y = cy + dy;
         if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
-        if (Math.random() < 0.4) {
+        if (Math.random() < 0.32) {
           state[idx(x, y)] = 1;
         }
       }
