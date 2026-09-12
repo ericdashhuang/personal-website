@@ -298,6 +298,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   gap: 10px;
   padding: 28px;
@@ -313,10 +314,8 @@ body {
 }
 
 .hover-text {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   gap: 10px;
 }
@@ -332,6 +331,10 @@ body {
   font-size: 0.8rem;
   color: #b7b7c2;
   font-style: italic;
+}
+
+.hover-overlay .note.spacer {
+  visibility: hidden;
 }
 
 .project-link {
