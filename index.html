@@ -139,16 +139,7 @@
           }
         }
         var i = idx(x, y);
-        var willLive;
-        if (state[i]) {
-          willLive = (n === 2 || n === 3) ? 1 : 0;
-        } else if (n === 3) {
-          willLive = 1;
-        } else if (n === 2 && Math.random() < 0.3) {
-          willLive = 1;
-        } else {
-          willLive = 0;
-        }
+        var willLive = state[i] ? ((n === 2 || n === 3) ? 1 : 0) : ((n === 3) ? 1 : 0);
         if (willLive && Math.random() < 0.11) willLive = 0;
         nextState[i] = willLive;
       }
@@ -191,27 +182,20 @@
       step();
       lastStep = ts;
     }
-    if (ts - lastSeedTime > 6000) {
-      state.fill(0);
-    }
     draw();
     requestAnimationFrame(loop);
   }
-
-  var lastSeedTime = 0;
 
   resize();
   window.addEventListener('resize', resize);
   hero.addEventListener('mousemove', function (e) {
     var rect = hero.getBoundingClientRect();
     seed(e.clientX - rect.left, e.clientY - rect.top);
-    lastSeedTime = performance.now();
   });
   hero.addEventListener('touchmove', function (e) {
     var rect = hero.getBoundingClientRect();
     var t = e.touches[0];
     if (t) seed(t.clientX - rect.left, t.clientY - rect.top);
-    lastSeedTime = performance.now();
   }, { passive: true });
 
   requestAnimationFrame(loop);
