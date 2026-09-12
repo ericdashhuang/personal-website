@@ -90,115 +90,165 @@
   var canvas = document.getElementById('life-canvas');
   var hero = document.querySelector('.hero');
   if (!canvas || !hero) return;
+
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (reducedMotion || !finePointer) return;
+
   var ctx = canvas.getContext('2d');
-  var cellSize = 5;
-  var green = '#5c945c';
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var cols, rows, state, nextState;
+
+  var CELL = 5;              // grid pitch in px
+  var SQUARE = 4;             // drawn square size (leaves a 1px gap for the grid lines)
+  var STEP_MS = 125;          // simulation tick interval
+  var MAX_DPR = 2;
+  var MIN_MOVE_PX = 6;        // ignore pointer jitter smaller than this
+  var MIN_MOVE_MS = 35;       // throttle: skip seeding faster than this
+  var DEATH_CHANCE = 0.12;    // per-generation attrition for a living cell
+  var EXPIRE_MS = 3000;       // hard-clear safety net if nothing has decayed by then
+  var FILL = 'rgba(80, 246, 117, 0.48)';
+
+  var cols, rows, w, h, dpr;
+  var state, nextState, protect;
+  var expireAt = 0;
+  var lastPointer = null;
+  var pendingEvent = null;
+  var rafHandle = null;
+  var stepTimer = null;
 
   function idx(x, y) { return y * cols + x; }
 
   function resize() {
-    var w = hero.clientWidth;
-    var h = hero.clientHeight;
-    canvas.width = Math.floor(w * dpr);
-    canvas.height = Math.floor(h * dpr);
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cols = Math.ceil(w / cellSize);
-    rows = Math.ceil(h / cellSize);
+    w = hero.clientWidth;
+    h = hero.clientHeight;
+    cols = Math.ceil(w / CELL);
+    rows = Math.ceil(h / CELL);
     state = new Uint8Array(cols * rows);
     nextState = new Uint8Array(cols * rows);
+    protect = new Uint8Array(cols * rows);
+    expireAt = 0;
+    dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
   }
 
-  function seed(px, py) {
-    var cx = Math.floor(px / cellSize);
-    var cy = Math.floor(py / cellSize);
-    for (var dy = -2; dy <= 2; dy++) {
-      for (var dx = -2; dx <= 2; dx++) {
-        var x = cx + dx, y = cy + dy;
-        if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
-        if (Math.random() < 0.32) {
-          state[idx(x, y)] = 1;
-        }
-      }
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = FILL;
+    for (var i = 0; i < state.length; i++) {
+      if (state[i] !== 1) continue;
+      var x = i % cols, y = (i - x) / cols;
+      ctx.fillRect(x * CELL, y * CELL, SQUARE, SQUARE);
     }
   }
 
-  function step() {
+  function scheduleStep() {
+    if (stepTimer === null) stepTimer = window.setTimeout(tick, STEP_MS);
+  }
+
+  function tick() {
+    stepTimer = null;
+    if (performance.now() >= expireAt) {
+      state.fill(0);
+      protect.fill(0);
+      draw();
+      return;
+    }
+    var anyAlive = 0;
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
+        var i = idx(x, y);
         var n = 0;
         for (var dy = -1; dy <= 1; dy++) {
+          var ny = y + dy;
+          if (ny < 0 || ny >= rows) continue;
           for (var dx = -1; dx <= 1; dx++) {
             if (dx === 0 && dy === 0) continue;
-            var nx = x + dx, ny = y + dy;
-            if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+            var nx = x + dx;
+            if (nx < 0 || nx >= cols) continue;
             n += state[idx(nx, ny)];
           }
         }
-        var i = idx(x, y);
-        var willLive = state[i] ? ((n === 2 || n === 3) ? 1 : 0) : ((n === 3) ? 1 : 0);
-        if (willLive && Math.random() < 0.11) willLive = 0;
-        nextState[i] = willLive;
-      }
-    }
-    // Break up 2x2 still-life blocks the instant they'd form - these never
-    // die under normal Game of Life rules and would otherwise sit forever.
-    for (var by = 0; by < rows - 1; by++) {
-      for (var bx = 0; bx < cols - 1; bx++) {
-        var a = idx(bx, by), b = idx(bx + 1, by), c = idx(bx, by + 1), d = idx(bx + 1, by + 1);
-        if (nextState[a] && nextState[b] && nextState[c] && nextState[d] && Math.random() < 0.5) {
-          nextState[a] = 0;
-          nextState[d] = 0;
-        }
+        var ruleAlive = (state[i] === 1 && n === 2) || n === 3;
+        var survives = state[i] !== 1 || Math.random() >= DEATH_CHANCE;
+        var protectedCell = protect[i] > 0;
+        var alive = (ruleAlive && survives) || protectedCell;
+        nextState[i] = alive ? 1 : 0;
+        if (protectedCell) protect[i] -= 1;
+        if (alive) anyAlive += 1;
       }
     }
     var tmp = state;
     state = nextState;
     nextState = tmp;
+    nextState.fill(0);
+    draw();
+    if (anyAlive > 0) scheduleStep();
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, hero.clientWidth, hero.clientHeight);
-    var size = cellSize - 1;
-    var offset = 1;
-    ctx.fillStyle = green;
-    ctx.globalAlpha = 0.9;
-    for (var y = 0; y < rows; y++) {
-      for (var x = 0; x < cols; x++) {
-        if (!state[idx(x, y)]) continue;
-        ctx.fillRect(x * cellSize + offset, y * cellSize + offset, size, size);
+  function seedAt(time, px, py) {
+    if (px < 0 || px >= w || py < 0 || py >= h) return;
+    var speed = 0;
+    if (lastPointer) {
+      var dt = Math.max(1, time - lastPointer.time);
+      var dist = Math.hypot(px - lastPointer.x, py - lastPointer.y);
+      if (dt < MIN_MOVE_MS || dist < MIN_MOVE_PX) return;
+      speed = Math.min(1, dist / dt / 5.5);
+    }
+    lastPointer = { time: time, x: px, y: py };
+    expireAt = time + EXPIRE_MS;
+
+    var curve = Math.pow(speed, 1.7);
+    var radius = 20 + 65 * curve;
+    var scanRadius = radius * (1.05 + curve * 0.1);
+
+    var minCol = Math.max(0, Math.floor((px - scanRadius) / CELL));
+    var maxCol = Math.min(cols - 1, Math.ceil((px + scanRadius) / CELL));
+    var minRow = Math.max(0, Math.floor((py - scanRadius) / CELL));
+    var maxRow = Math.min(rows - 1, Math.ceil((py + scanRadius) / CELL));
+
+    for (var ry = minRow; ry <= maxRow; ry++) {
+      for (var rx = minCol; rx <= maxCol; rx++) {
+        var cx = rx * CELL + SQUARE / 2;
+        var cy = ry * CELL + SQUARE / 2;
+        var s = Math.hypot(cx - px, cy - py) / radius;
+        var chance = 0.004 + 0.68 * Math.exp(-4.5 * s * s);
+        if (Math.random() >= chance) continue;
+        var i = idx(rx, ry);
+        state[i] = 1;
+        protect[i] = 1;
       }
     }
-    ctx.globalAlpha = 1;
+    draw();
+    scheduleStep();
   }
 
-  var lastStep = 0;
-  var stepInterval = 140;
-  function loop(ts) {
-    if (ts - lastStep > stepInterval) {
-      step();
-      lastStep = ts;
+  function onPointerMove(e) {
+    if (e.isPrimary === false) return;
+    pendingEvent = { time: performance.now(), x: e.clientX, y: e.clientY };
+    if (rafHandle === null) {
+      rafHandle = window.requestAnimationFrame(function () {
+        rafHandle = null;
+        var ev = pendingEvent;
+        pendingEvent = null;
+        if (ev) {
+          var rect = hero.getBoundingClientRect();
+          seedAt(ev.time, ev.x - rect.left, ev.y - rect.top);
+        }
+      });
     }
-    draw();
-    requestAnimationFrame(loop);
+  }
+
+  function onPointerLeave() {
+    lastPointer = null;
+    pendingEvent = null;
   }
 
   resize();
-  window.addEventListener('resize', resize);
-  hero.addEventListener('mousemove', function (e) {
-    var rect = hero.getBoundingClientRect();
-    seed(e.clientX - rect.left, e.clientY - rect.top);
-  });
-  hero.addEventListener('touchmove', function (e) {
-    var rect = hero.getBoundingClientRect();
-    var t = e.touches[0];
-    if (t) seed(t.clientX - rect.left, t.clientY - rect.top);
-  }, { passive: true });
-
-  requestAnimationFrame(loop);
+  window.addEventListener('resize', resize, { passive: true });
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
+  document.documentElement.addEventListener('pointerleave', onPointerLeave, { passive: true });
 })();
 </script>
 
