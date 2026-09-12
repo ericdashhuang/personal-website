@@ -6,7 +6,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1f2029;
-  background: #f5f5f7;
+  background: #0d0c12;
 }
 
 /* ---------- Hero ---------- */
@@ -17,17 +17,29 @@ body {
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background: radial-gradient(circle at 75% 20%, #f3e8fd 0%, #d9b8f0 35%, #b98ee0 70%, #a873d6 100%);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(55% 50% at 12% 18%, rgba(255, 127, 107, 0.65) 0%, transparent 65%),
+    radial-gradient(50% 45% at 88% 12%, rgba(124, 92, 255, 0.6) 0%, transparent 65%),
+    radial-gradient(55% 50% at 15% 88%, rgba(53, 208, 192, 0.55) 0%, transparent 65%),
+    radial-gradient(50% 45% at 90% 90%, rgba(255, 207, 92, 0.5) 0%, transparent 65%),
+    #100f17;
 }
 
 .hero-card {
   max-width: 620px;
   width: 100%;
-  background: #4b4a5e;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
   padding: 48px 56px;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(40, 20, 70, 0.35);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  position: relative;
+  z-index: 1;
 }
 
 .hero-card h1 {
@@ -37,7 +49,7 @@ body {
 }
 
 .hero-card p {
-  color: #d3d1de;
+  color: #e4e2ee;
   font-size: 1.05rem;
   line-height: 1.6;
   margin: 0 0 14px;
@@ -55,7 +67,7 @@ body {
 }
 
 .socials a {
-  color: #d3d1de;
+  color: #e4e2ee;
   transition: color 0.15s ease;
 }
 
@@ -63,55 +75,20 @@ body {
   color: #ffffff;
 }
 
-/* ---------- Experience ---------- */
-
-.experience {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 80px 24px;
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 40px;
+.scroll-cue {
+  display: inline-flex;
+  margin-top: 28px;
+  color: rgba(255, 255, 255, 0.55);
+  animation: bob 2s ease-in-out infinite;
 }
 
-.section-label h2 {
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-  color: #1f2029;
-  border-bottom: 3px solid #e08a3c;
-  display: inline-block;
-  padding-bottom: 6px;
-  margin: 0;
+.scroll-cue:hover {
+  color: #ffffff;
 }
 
-.entry-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.entry-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.dates {
-  color: #6b6b76;
-  font-size: 0.9rem;
-}
-
-.location {
-  color: #6b6b76;
-  font-style: italic;
-  margin: 2px 0 14px;
-}
-
-.entry-body {
-  color: #33333d;
-  line-height: 1.65;
-  margin: 0 0 12px;
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
 }
 
 /* ---------- Projects ---------- */
@@ -119,13 +96,14 @@ body {
 .projects {
   max-width: 900px;
   margin: 0 auto;
-  padding: 40px 24px 80px;
+  padding: 80px 24px;
 }
 
 .projects > h2 {
   text-align: center;
   font-size: 1.6rem;
   margin-bottom: 36px;
+  color: #f4f2fa;
 }
 
 .project-grid {
@@ -138,64 +116,96 @@ body {
   display: block;
   text-decoration: none;
   color: inherit;
-  border: 1px solid #e2e2e8;
   border-radius: 16px;
   overflow: hidden;
-  background: #ffffff;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .project-card:hover {
-  box-shadow: 0 12px 30px rgba(30, 20, 50, 0.12);
   transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
 }
 
-.project-thumb {
-  height: 96px;
+.project-visual {
+  position: relative;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border: 1px solid #e2e2e8;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.logo-mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  height: 150px;
+}
+
+.logo-mark img,
+.logo-mark svg {
+  max-height: 150px;
+  width: auto;
+}
+
+.soundprint-visual {
+  background: linear-gradient(160deg, #f4fdf8, #e6f7ee);
+}
+
+.gooseguide-visual {
+  background: linear-gradient(160deg, #fdf8ef, #f5ecd9);
+}
+
+.logo-name {
   font-weight: 700;
   font-size: 1.15rem;
-  letter-spacing: 0.02em;
+  color: #1f2029;
 }
 
-.soundprint-thumb {
-  background: linear-gradient(135deg, #1db954, #14532d);
+.hover-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 28px;
+  background: rgba(12, 12, 18, 0.92);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
-.gooseguide-thumb {
-  background: linear-gradient(135deg, #ffcb47, #1a1a1a);
+.project-card:hover .hover-overlay {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.project-body {
-  padding: 20px 24px 24px;
-}
-
-.project-body h3 {
-  margin: 0 0 10px;
-}
-
-.project-body p {
-  color: #45454f;
+.hover-overlay p {
+  color: #f1f1f5;
   line-height: 1.55;
-  font-size: 0.95rem;
-  margin: 0 0 10px;
+  font-size: 0.92rem;
+  margin: 0;
 }
 
-.project-body .note {
-  font-size: 0.82rem;
-  color: #8a8a94;
+.hover-overlay .note {
+  font-size: 0.8rem;
+  color: #b7b7c2;
   font-style: italic;
 }
 
 .project-link {
   display: inline-block;
-  margin-top: 6px;
-  font-size: 0.88rem;
+  margin-top: 4px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #7b4fb0;
+  color: #c9b6ff;
   cursor: pointer;
 }
 
@@ -208,17 +218,18 @@ body {
 .contact {
   max-width: 620px;
   margin: 0 auto;
-  padding: 40px 24px 100px;
+  padding: 20px 24px 100px;
   text-align: center;
 }
 
 .contact h2 {
   font-size: 1.6rem;
   margin-bottom: 8px;
+  color: #f4f2fa;
 }
 
 .contact > p {
-  color: #6b6b76;
+  color: #b9b7c4;
   margin-bottom: 32px;
 }
 
@@ -236,13 +247,13 @@ body {
 }
 
 .contact-label {
-  color: #6b6b76;
+  color: #9a97a8;
   min-width: 60px;
   text-align: right;
 }
 
 .contact-row a {
-  color: #7b4fb0;
+  color: #caa8ff;
   text-decoration: none;
   font-weight: 600;
 }
@@ -260,10 +271,5 @@ body {
 
   .hero-card h1 {
     font-size: 2.1rem;
-  }
-
-  .experience {
-    grid-template-columns: 1fr;
-    gap: 16px;
   }
 }
