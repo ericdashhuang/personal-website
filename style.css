@@ -6,7 +6,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1f2029;
-  background: #f2f9fb;
+  background: #0a0a0a;
 }
 
 /* ---------- Hero ---------- */
@@ -20,11 +20,10 @@ body {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(60% 55% at 18% 15%, rgba(142, 202, 230, 0.55) 0%, transparent 65%),
-    radial-gradient(55% 50% at 85% 10%, rgba(184, 232, 216, 0.55) 0%, transparent 65%),
-    radial-gradient(60% 55% at 15% 90%, rgba(189, 224, 254, 0.55) 0%, transparent 65%),
-    radial-gradient(55% 50% at 88% 88%, rgba(202, 240, 248, 0.6) 0%, transparent 65%),
-    #eaf6fa;
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    #0a0a0a;
+  background-size: 28px 28px, 28px 28px, auto;
 }
 
 .life-canvas {
@@ -39,14 +38,14 @@ body {
 .hero-card {
   max-width: 620px;
   width: 100%;
-  background: rgba(20, 38, 46, 0.72);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
   padding: 48px 56px;
   text-align: center;
-  box-shadow: 0 30px 80px rgba(20, 60, 70, 0.18);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
   position: relative;
   z-index: 1;
 }
@@ -112,7 +111,7 @@ body {
   text-align: center;
   font-size: 1.6rem;
   margin-bottom: 36px;
-  color: #16424d;
+  color: #f4f2fa;
 }
 
 .project-grid {
@@ -143,7 +142,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  border: 1px solid #cfe6ec;
+  border: 1px solid #2a2a2a;
   border-radius: 16px;
   overflow: hidden;
 }
@@ -162,11 +161,11 @@ body {
 }
 
 .soundprint-visual {
-  background: linear-gradient(160deg, #eaf7fb, #d3ecf7);
+  background: linear-gradient(160deg, #f4fdf8, #e6f7ee);
 }
 
 .gooseguide-visual {
-  background: linear-gradient(160deg, #eaf9f4, #d7f0e6);
+  background: linear-gradient(160deg, #fdf8ef, #f5ecd9);
 }
 
 .logo-name {
@@ -214,7 +213,7 @@ body {
   margin-top: 4px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #8ecae6;
+  color: #4ade80;
   cursor: pointer;
 }
 
@@ -234,11 +233,11 @@ body {
 .contact h2 {
   font-size: 1.6rem;
   margin-bottom: 8px;
-  color: #16424d;
+  color: #f4f2fa;
 }
 
 .contact > p {
-  color: #4a636b;
+  color: #9a9aa4;
   margin-bottom: 32px;
 }
 
@@ -256,13 +255,13 @@ body {
 }
 
 .contact-label {
-  color: #6b8890;
+  color: #7a7a84;
   min-width: 60px;
   text-align: right;
 }
 
 .contact-row a {
-  color: #2a9d8f;
+  color: #4ade80;
   text-decoration: none;
   font-weight: 600;
 }

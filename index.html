@@ -91,10 +91,10 @@
   var hero = document.querySelector('.hero');
   if (!canvas || !hero) return;
   var ctx = canvas.getContext('2d');
-  var cellSize = 16;
-  var palette = ['#8ecae6', '#a8dadc', '#bde0fe', '#caf0f8', '#90e0ef', '#b8e8d8'];
+  var cellSize = 14;
+  var green = '#22c55e';
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var cols, rows, alive, nextAlive, colorIdx;
+  var cols, rows, state, nextState, energy;
 
   function idx(x, y) { return y * cols + x; }
 
@@ -108,19 +108,9 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     cols = Math.ceil(w / cellSize);
     rows = Math.ceil(h / cellSize);
-    alive = new Uint8Array(cols * rows);
-    nextAlive = new Uint8Array(cols * rows);
-    colorIdx = new Uint8Array(cols * rows);
-  }
-
-  function roundRect(x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
+    state = new Uint8Array(cols * rows);
+    nextState = new Uint8Array(cols * rows);
+    energy = new Float32Array(cols * rows);
   }
 
   function seed(px, py) {
@@ -130,10 +120,10 @@
       for (var dx = -1; dx <= 1; dx++) {
         var x = cx + dx, y = cy + dy;
         if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
-        if (Math.random() < 0.35) {
+        if (Math.random() < 0.22) {
           var i = idx(x, y);
-          alive[i] = 1;
-          colorIdx[i] = Math.floor(Math.random() * palette.length);
+          state[i] = 1;
+          energy[i] = 1;
         }
       }
     }
@@ -148,47 +138,59 @@
             if (dx === 0 && dy === 0) continue;
             var nx = x + dx, ny = y + dy;
             if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
-            n += alive[idx(nx, ny)];
+            n += state[idx(nx, ny)];
           }
         }
         var i = idx(x, y);
-        if (alive[i]) {
-          nextAlive[i] = (n === 2 || n === 3) ? 1 : 0;
-        } else {
-          nextAlive[i] = (n === 3) ? 1 : 0;
-          if (nextAlive[i]) colorIdx[i] = Math.floor(Math.random() * palette.length);
-        }
+        var willLive = state[i] ? ((n === 2 || n === 3) ? 1 : 0) : ((n === 3) ? 1 : 0);
+        if (willLive && Math.random() < 0.05) willLive = 0;
+        nextState[i] = willLive;
       }
     }
-    var tmp = alive;
-    alive = nextAlive;
-    nextAlive = tmp;
+    var tmp = state;
+    state = nextState;
+    nextState = tmp;
+  }
+
+  function updateEnergy() {
+    for (var i = 0; i < energy.length; i++) {
+      if (state[i]) {
+        energy[i] = Math.min(1, energy[i] + 0.5);
+      } else if (energy[i] > 0.01) {
+        energy[i] *= 0.94;
+      } else if (energy[i] !== 0) {
+        energy[i] = 0;
+      }
+    }
   }
 
   function draw() {
     ctx.clearRect(0, 0, hero.clientWidth, hero.clientHeight);
-    var size = cellSize * 0.62;
+    var size = cellSize * 0.7;
     var offset = (cellSize - size) / 2;
-    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = green;
+    ctx.shadowColor = green;
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
         var i = idx(x, y);
-        if (!alive[i]) continue;
-        ctx.fillStyle = palette[colorIdx[i]];
-        roundRect(x * cellSize + offset, y * cellSize + offset, size, size, 3);
-        ctx.fill();
+        if (energy[i] <= 0.01) continue;
+        ctx.globalAlpha = energy[i] * 0.85;
+        ctx.shadowBlur = 5 * energy[i];
+        ctx.fillRect(x * cellSize + offset, y * cellSize + offset, size, size);
       }
     }
     ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
   }
 
   var lastStep = 0;
-  var stepInterval = 180;
+  var stepInterval = 220;
   function loop(ts) {
     if (ts - lastStep > stepInterval) {
       step();
       lastStep = ts;
     }
+    updateEnergy();
     draw();
     requestAnimationFrame(loop);
   }
