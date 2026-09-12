@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eric Huang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,9 +14,16 @@
 <section class="hero">
   <canvas id="life-canvas" class="life-canvas" aria-hidden="true"></canvas>
   <div class="hero-card">
-    <h1>Hey! I'm Eric.</h1>
-    <p>I study Computer Engineering at the <strong>University of Waterloo</strong>.</p>
-    <p>Check out what I've been up to below!</p>
+    <div class="intro-visual" aria-hidden="true">
+      <h1 id="intro-line1"></h1>
+      <p id="intro-line2"></p>
+      <p id="intro-line3"></p>
+    </div>
+    <div class="sr-only">
+      <h1>Hey! I'm Eric.</h1>
+      <p>I study Computer Engineering at the <strong>University of Waterloo</strong>.</p>
+      <p>Check out what I've been up to below!</p>
+    </div>
     <div class="socials">
       <a href="https://github.com/ericdashhuang" target="_blank" rel="noopener" aria-label="GitHub">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.07 11.07 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.76.12 3.05.74.8 1.18 1.83 1.18 3.09 0 4.43-2.69 5.41-5.25 5.69.42.36.78 1.08.78 2.18 0 1.57-.02 2.84-.02 3.23 0 .3.2.66.79.55A10.51 10.51 0 0 0 23.5 12c0-6.27-5.23-11.5-11.5-11.5z"/></svg>
@@ -84,6 +94,123 @@
     </div>
   </div>
 </section>
+
+<script>
+(function () {
+  var LINES = [
+    { el: document.getElementById('intro-line1'), tokens: [
+      { text: 'Hey!', alts: ['Hi!', 'Yo!', 'Sup!'] },
+      { text: "I'm", alts: ['I am', "It's", 'Meet'] },
+      { text: 'Eric.', alts: ['Huang.', 'there.', 'Dash.'] }
+    ] },
+    { el: document.getElementById('intro-line2'), tokens: [
+      { text: 'I', alts: ["I'm", 'Now', 'Currently'] },
+      { text: 'study', alts: ['pursue', 'major in', 'learn'] },
+      { text: 'Computer', alts: ['Software', 'Electrical', 'Systems'] },
+      { text: 'Engineering', alts: ['Science', 'Engineer', 'Eng.'] },
+      { text: 'at', alts: ['with', '@', 'through'] },
+      { text: 'the', alts: ['The', 'my', 'a'] },
+      { text: 'University', alts: ['College', 'Institute', 'Uni'], bold: true },
+      { text: 'of', alts: ['at', 'for', 'in'], bold: true },
+      { text: 'Waterloo.', alts: ['Toronto.', 'Windsor.', 'UW.'], bold: true }
+    ] },
+    { el: document.getElementById('intro-line3'), tokens: [
+      { text: 'Check', alts: ['See', 'Look', 'Scroll'] },
+      { text: 'out', alts: ['through', 'below', 'over'] },
+      { text: 'what', alts: ['all', 'the stuff', 'things'] },
+      { text: "I've", alts: ['I have', "I'd", "We've"] },
+      { text: 'been', alts: ['gotten', 'kept', 'stayed'] },
+      { text: 'up', alts: ['hard', 'deep'] },
+      { text: 'to', alts: ['at', 'on'] },
+      { text: 'below!', alts: ['lately!', 'recently!', 'here!'] }
+    ] }
+  ];
+
+  var PROBS = [0.42, 0.23, 0.11];
+  var SHOW_MS = 130;
+  var GAP_MS = 35;
+  var LINE_GAP_MS = 160;
+  var START_DELAY_MS = 900;
+
+  function buildCaret(token) {
+    var caret = document.createElement('span');
+    caret.className = 'gen-caret';
+
+    var cursor = document.createElement('span');
+    cursor.className = 'gen-cursor';
+    caret.appendChild(cursor);
+
+    var panel = document.createElement('span');
+    panel.className = 'gen-candidates';
+    var words = [token.text].concat(token.alts).slice(0, 3);
+    // shuffle order a little so the real word isn't always on top, then re-sort by assigned prob
+    var order = words.slice().sort(function () { return Math.random() - 0.5; });
+    order.forEach(function (word, i) {
+      var row = document.createElement('span');
+      row.className = 'gen-candidate-row' + (word === token.text ? ' is-target' : '');
+      var w = document.createElement('span');
+      w.textContent = word;
+      var p = document.createElement('span');
+      p.className = 'gen-prob';
+      p.textContent = (PROBS[i] || 0.05).toFixed(2);
+      row.appendChild(w);
+      row.appendChild(p);
+      panel.appendChild(row);
+    });
+    caret.appendChild(panel);
+    return caret;
+  }
+
+  function typeLine(line, done) {
+    var el = line.el;
+    if (!el) { done(); return; }
+    var i = 0;
+    function step() {
+      if (i >= line.tokens.length) { done(); return; }
+      var token = line.tokens[i];
+      var caret = buildCaret(token);
+      el.appendChild(caret);
+      window.setTimeout(function () {
+        caret.remove();
+        var word = document.createElement(token.bold ? 'strong' : 'span');
+        word.className = 'gen-word';
+        word.textContent = token.text + (i < line.tokens.length - 1 ? ' ' : '');
+        el.appendChild(word);
+        i += 1;
+        window.setTimeout(step, GAP_MS);
+      }, SHOW_MS);
+    }
+    step();
+  }
+
+  function typeAll(lines) {
+    var i = 0;
+    function next() {
+      if (i >= lines.length) return;
+      var line = lines[i];
+      i += 1;
+      typeLine(line, function () {
+        window.setTimeout(next, LINE_GAP_MS);
+      });
+    }
+    next();
+  }
+
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reducedMotion) {
+    LINES.forEach(function (line) {
+      if (!line.el) return;
+      line.tokens.forEach(function (token, i) {
+        var word = document.createElement(token.bold ? 'strong' : 'span');
+        word.textContent = token.text + (i < line.tokens.length - 1 ? ' ' : '');
+        line.el.appendChild(word);
+      });
+    });
+  } else {
+    window.setTimeout(function () { typeAll(LINES); }, START_DELAY_MS);
+  }
+})();
+</script>
 
 <script>
 (function () {
