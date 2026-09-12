@@ -140,7 +140,7 @@
         }
         var i = idx(x, y);
         var willLive = state[i] ? ((n === 2 || n === 3) ? 1 : 0) : ((n === 3) ? 1 : 0);
-        if (willLive && Math.random() < 0.22) willLive = 0;
+        if (willLive && Math.random() < 0.11) willLive = 0;
         nextState[i] = willLive;
       }
     }
@@ -149,7 +149,7 @@
     for (var by = 0; by < rows - 1; by++) {
       for (var bx = 0; bx < cols - 1; bx++) {
         var a = idx(bx, by), b = idx(bx + 1, by), c = idx(bx, by + 1), d = idx(bx + 1, by + 1);
-        if (nextState[a] && nextState[b] && nextState[c] && nextState[d]) {
+        if (nextState[a] && nextState[b] && nextState[c] && nextState[d] && Math.random() < 0.5) {
           nextState[a] = 0;
           nextState[d] = 0;
         }
@@ -182,7 +182,7 @@
       step();
       lastStep = ts;
     }
-    if (ts - lastSeedTime > 3000) {
+    if (ts - lastSeedTime > 6000) {
       state.fill(0);
     }
     draw();
