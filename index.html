@@ -166,25 +166,22 @@
 
   function draw() {
     ctx.clearRect(0, 0, hero.clientWidth, hero.clientHeight);
-    var size = cellSize;
-    var offset = (cellSize - size) / 2;
+    var size = cellSize - 1;
+    var offset = 1;
     ctx.fillStyle = green;
-    ctx.shadowColor = green;
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
         var i = idx(x, y);
         if (energy[i] <= 0.01) continue;
-        ctx.globalAlpha = energy[i] * 0.85;
-        ctx.shadowBlur = 5 * energy[i];
+        ctx.globalAlpha = energy[i] * 0.9;
         ctx.fillRect(x * cellSize + offset, y * cellSize + offset, size, size);
       }
     }
     ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
   }
 
   var lastStep = 0;
-  var stepInterval = 60;
+  var stepInterval = 140;
   function loop(ts) {
     if (ts - lastStep > stepInterval) {
       step();

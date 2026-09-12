@@ -6,7 +6,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1f2029;
-  background: #232323;
+  background: #101010;
 }
 
 /* ---------- Hero ---------- */
@@ -22,7 +22,7 @@ body {
   background:
     linear-gradient(rgba(0, 0, 0, 0.75) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 0, 0, 0.75) 1px, transparent 1px),
-    #232323;
+    #101010;
   background-size: 7px 7px, 7px 7px, auto;
 }
 
@@ -33,7 +33,7 @@ body {
   right: 0;
   bottom: 0;
   height: 180px;
-  background: linear-gradient(to bottom, transparent, #232323);
+  background: linear-gradient(to bottom, transparent, #101010);
   z-index: 2;
   pointer-events: none;
 }
