@@ -94,7 +94,7 @@
   var cellSize = 7;
   var green = '#166534';
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var cols, rows, state, nextState, energy;
+  var cols, rows, state, nextState;
 
   function idx(x, y) { return y * cols + x; }
 
@@ -110,7 +110,6 @@
     rows = Math.ceil(h / cellSize);
     state = new Uint8Array(cols * rows);
     nextState = new Uint8Array(cols * rows);
-    energy = new Float32Array(cols * rows);
   }
 
   function seed(px, py) {
@@ -121,9 +120,7 @@
         var x = cx + dx, y = cy + dy;
         if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
         if (Math.random() < 0.22) {
-          var i = idx(x, y);
-          state[i] = 1;
-          energy[i] = 1;
+          state[idx(x, y)] = 1;
         }
       }
     }
@@ -143,8 +140,19 @@
         }
         var i = idx(x, y);
         var willLive = state[i] ? ((n === 2 || n === 3) ? 1 : 0) : ((n === 3) ? 1 : 0);
-        if (willLive && Math.random() < 0.05) willLive = 0;
+        if (willLive && Math.random() < 0.22) willLive = 0;
         nextState[i] = willLive;
+      }
+    }
+    // Break up 2x2 still-life blocks the instant they'd form - these never
+    // die under normal Game of Life rules and would otherwise sit forever.
+    for (var by = 0; by < rows - 1; by++) {
+      for (var bx = 0; bx < cols - 1; bx++) {
+        var a = idx(bx, by), b = idx(bx + 1, by), c = idx(bx, by + 1), d = idx(bx + 1, by + 1);
+        if (nextState[a] && nextState[b] && nextState[c] && nextState[d]) {
+          nextState[a] = 0;
+          nextState[d] = 0;
+        }
       }
     }
     var tmp = state;
@@ -152,28 +160,15 @@
     nextState = tmp;
   }
 
-  function updateEnergy() {
-    for (var i = 0; i < energy.length; i++) {
-      if (state[i]) {
-        energy[i] = Math.min(1, energy[i] + 0.5);
-      } else if (energy[i] > 0.01) {
-        energy[i] *= 0.94;
-      } else if (energy[i] !== 0) {
-        energy[i] = 0;
-      }
-    }
-  }
-
   function draw() {
     ctx.clearRect(0, 0, hero.clientWidth, hero.clientHeight);
     var size = cellSize - 1;
     var offset = 1;
     ctx.fillStyle = green;
+    ctx.globalAlpha = 0.9;
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
-        var i = idx(x, y);
-        if (energy[i] <= 0.01) continue;
-        ctx.globalAlpha = energy[i] * 0.9;
+        if (!state[idx(x, y)]) continue;
         ctx.fillRect(x * cellSize + offset, y * cellSize + offset, size, size);
       }
     }
@@ -187,21 +182,27 @@
       step();
       lastStep = ts;
     }
-    updateEnergy();
+    if (ts - lastSeedTime > 3000) {
+      state.fill(0);
+    }
     draw();
     requestAnimationFrame(loop);
   }
+
+  var lastSeedTime = 0;
 
   resize();
   window.addEventListener('resize', resize);
   hero.addEventListener('mousemove', function (e) {
     var rect = hero.getBoundingClientRect();
     seed(e.clientX - rect.left, e.clientY - rect.top);
+    lastSeedTime = performance.now();
   });
   hero.addEventListener('touchmove', function (e) {
     var rect = hero.getBoundingClientRect();
     var t = e.touches[0];
     if (t) seed(t.clientX - rect.left, t.clientY - rect.top);
+    lastSeedTime = performance.now();
   }, { passive: true });
 
   requestAnimationFrame(loop);
