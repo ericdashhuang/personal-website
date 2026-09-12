@@ -91,8 +91,8 @@
   var hero = document.querySelector('.hero');
   if (!canvas || !hero) return;
   var ctx = canvas.getContext('2d');
-  var cellSize = 14;
-  var green = '#22c55e';
+  var cellSize = 7;
+  var green = '#166534';
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   var cols, rows, state, nextState, energy;
 
@@ -116,8 +116,8 @@
   function seed(px, py) {
     var cx = Math.floor(px / cellSize);
     var cy = Math.floor(py / cellSize);
-    for (var dy = -1; dy <= 1; dy++) {
-      for (var dx = -1; dx <= 1; dx++) {
+    for (var dy = -3; dy <= 3; dy++) {
+      for (var dx = -3; dx <= 3; dx++) {
         var x = cx + dx, y = cy + dy;
         if (x < 0 || y < 0 || x >= cols || y >= rows) continue;
         if (Math.random() < 0.22) {
@@ -166,7 +166,7 @@
 
   function draw() {
     ctx.clearRect(0, 0, hero.clientWidth, hero.clientHeight);
-    var size = cellSize * 0.7;
+    var size = cellSize;
     var offset = (cellSize - size) / 2;
     ctx.fillStyle = green;
     ctx.shadowColor = green;
@@ -184,7 +184,7 @@
   }
 
   var lastStep = 0;
-  var stepInterval = 220;
+  var stepInterval = 60;
   function loop(ts) {
     if (ts - lastStep > stepInterval) {
       step();
