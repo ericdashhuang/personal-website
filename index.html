@@ -104,12 +104,10 @@
   var MIN_MOVE_PX = 6;        // ignore pointer jitter smaller than this
   var MIN_MOVE_MS = 35;       // throttle: skip seeding faster than this
   var DEATH_CHANCE = 0.12;    // per-generation attrition for a living cell
-  var EXPIRE_MS = 3000;       // hard-clear safety net if nothing has decayed by then
   var FILL = 'rgba(80, 246, 117, 0.48)';
 
   var cols, rows, w, h, dpr;
   var state, nextState, protect;
-  var expireAt = 0;
   var lastPointer = null;
   var pendingEvent = null;
   var rafHandle = null;
@@ -125,7 +123,6 @@
     state = new Uint8Array(cols * rows);
     nextState = new Uint8Array(cols * rows);
     protect = new Uint8Array(cols * rows);
-    expireAt = 0;
     dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
@@ -149,12 +146,6 @@
 
   function tick() {
     stepTimer = null;
-    if (performance.now() >= expireAt) {
-      state.fill(0);
-      protect.fill(0);
-      draw();
-      return;
-    }
     var anyAlive = 0;
     for (var y = 0; y < rows; y++) {
       for (var x = 0; x < cols; x++) {
@@ -197,7 +188,6 @@
       speed = Math.min(1, dist / dt / 5.5);
     }
     lastPointer = { time: time, x: px, y: py };
-    expireAt = time + EXPIRE_MS;
 
     var curve = Math.pow(speed, 1.7);
     var radius = 20 + 65 * curve;
