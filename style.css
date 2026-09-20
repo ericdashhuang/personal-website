@@ -327,16 +327,6 @@ body {
   margin: 0;
 }
 
-.hover-overlay .note {
-  font-size: 0.8rem;
-  color: #b7b7c2;
-  font-style: italic;
-}
-
-.hover-overlay .note.spacer {
-  visibility: hidden;
-}
-
 .project-link {
   display: inline-block;
   margin-top: 4px;
