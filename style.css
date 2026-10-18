@@ -188,6 +188,7 @@ body {
 .socials {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 16px;
   margin: 14px 0 2px;
 }
@@ -360,16 +361,18 @@ body {
   margin-bottom: 32px;
 }
 
+/* two column grid so every label and link lines up instead of each row centering on its own */
 .contact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  column-gap: 10px;
+  row-gap: 14px;
+  text-align: left;
 }
 
 .contact-row {
-  display: flex;
-  gap: 10px;
+  display: contents;
   font-size: 1rem;
 }
 
